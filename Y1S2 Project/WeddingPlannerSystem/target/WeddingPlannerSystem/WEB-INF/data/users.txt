@@ -1,0 +1,2 @@
+1|John|Doe|john@example.com|pass123|customer|2026-03-01 10:00:00
+2|Jane|Smith|jane@example.com|pass456|admin|2026-03-01 10:05:00

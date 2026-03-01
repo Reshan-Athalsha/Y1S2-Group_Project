@@ -1,0 +1,79 @@
+/* ═══════════════════════════════════════════════════════════
+   Wedding Planner & Vendor Booking System — Custom Styles
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Hero Section ────────────────────────────────────────── */
+.hero-section {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 420px;
+    padding: 80px 0;
+}
+
+/* ── Card hover effect ───────────────────────────────────── */
+.card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ── Navbar brand icon animation ─────────────────────────── */
+.navbar-brand .bi-heart-fill {
+    animation: pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.2); }
+}
+
+/* ── Table styles ────────────────────────────────────────── */
+.table th {
+    background-color: #343a40;
+    color: #fff;
+    border-color: #454d55;
+}
+
+/* ── Form styles ─────────────────────────────────────────── */
+.form-section {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.form-section h2 {
+    margin-bottom: 24px;
+    color: #343a40;
+}
+
+/* ── Status badges ───────────────────────────────────────── */
+.badge-pending   { background-color: #ffc107; color: #000; }
+.badge-confirmed { background-color: #28a745; }
+.badge-cancelled { background-color: #dc3545; }
+.badge-completed { background-color: #6c757d; }
+
+/* ── Star rating display ─────────────────────────────────── */
+.stars .bi-star-fill { color: #ffc107; }
+.stars .bi-star      { color: #dee2e6; }
+
+/* ── Footer ──────────────────────────────────────────────── */
+footer {
+    margin-top: auto;
+}
+
+/* Ensure the page takes full height */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+body > section,
+body > header {
+    flex-shrink: 0;
+}
