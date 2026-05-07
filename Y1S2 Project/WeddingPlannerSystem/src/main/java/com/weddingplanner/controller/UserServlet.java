@@ -1,29 +1,32 @@
 package com.weddingplanner.controller;
 
+import com.weddingplanner.model.AdminUser;
+import com.weddingplanner.model.RegularUser;
 import com.weddingplanner.model.User;
-import com.weddingplanner.util.FileStorageUtil;
+import com.weddingplanner.util.UserFileManager;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Sample Servlet demonstrating how to build a controller.
+ * UserServlet -- HTTP Controller for Component 01: User Management.
  *
- * URL mapping: /users
- *   GET  /users           → list all users
- *   GET  /users?action=add → show the "add user" form
- *   POST /users           → create a new user
+ * URL Mapping: /users
  *
- * ── TEAM NOTE ────────────────────────────────────────────────
- *   Use this as a TEMPLATE when you build VendorServlet,
- *   BookingServlet, ReviewServlet, etc.
- * ─────────────────────────────────────────────────────────────
+ * ROUTING TABLE:
+ *   GET  /users                    --> list all users (default)
+ *   GET  /users?action=add         --> show registration form
+ *   GET  /users?action=edit&id=3   --> show edit form pre-filled
+ *   GET  /users?action=delete&id=3 --> delete user 3, then redirect
+ *   POST /users                    --> CREATE a new user
+ *   POST /users?action=update      --> UPDATE an existing user
  *
  * @author  Team — Wedding Planner System
  * @version 1.0
@@ -31,82 +34,160 @@ import java.util.List;
 @WebServlet("/users")
 public class UserServlet extends HttpServlet {
 
-    /** Relative path inside the WAR to the data file. */
     private static final String DATA_FILE = "/WEB-INF/data/users.txt";
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    /** Get the absolute path on disk for the data file. */
     private String getDataFilePath() {
         return getServletContext().getRealPath(DATA_FILE);
     }
 
-    // ──────────────────── GET ────────────────────────────────
-
     @Override
-    protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
 
         if ("add".equalsIgnoreCase(action)) {
-            // Forward to the "add user" form
-            request.getRequestDispatcher("/WEB-INF/views/user/user-form.jsp")
-                   .forward(request, response);
-            return;
+            showAddForm(request, response);
+        } else if ("edit".equalsIgnoreCase(action)) {
+            showEditForm(request, response);
+        } else if ("delete".equalsIgnoreCase(action)) {
+            deleteUser(request, response);
+        } else {
+            listAllUsers(request, response);
         }
-
-        // Default: list all users
-        List<User> users = getAllUsers();
-        request.setAttribute("users", users);
-        request.getRequestDispatcher("/WEB-INF/views/user/user-list.jsp")
-               .forward(request, response);
     }
 
-    // ──────────────────── POST ───────────────────────────────
-
     @Override
-    protected void doPost(HttpServletRequest request,
-                          HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String filePath = getDataFilePath();
+        String action = request.getParameter("action");
 
-        // Read form parameters
+        if ("update".equalsIgnoreCase(action)) {
+            updateUser(request, response);
+        } else {
+            createUser(request, response);
+        }
+    }
+
+    private void listAllUsers(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        List<User> users = UserFileManager.getAllUsers(getDataFilePath());
+        request.setAttribute("users", users);
+        request.getRequestDispatcher("/WEB-INF/views/user/user-list.jsp").forward(request, response);
+    }
+
+    private void showAddForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/WEB-INF/views/user/user-form.jsp").forward(request, response);
+    }
+
+    private void createUser(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         String firstName = request.getParameter("firstName");
         String lastName  = request.getParameter("lastName");
         String email     = request.getParameter("email");
         String password  = request.getParameter("password");
         String role      = request.getParameter("role");
 
-        // Auto-generate ID and timestamp
-        int nextId = FileStorageUtil.getNextId(filePath);
-        String now = LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String filePath = getDataFilePath();
+        int    nextId   = UserFileManager.getNextId(filePath);
+        String now      = LocalDateTime.now().format(DATE_FMT);
 
-        // Build entity and persist
-        User user = new User(nextId, firstName, lastName,
-                             email, password,
-                             (role != null ? role : "customer"), now);
+        // POLYMORPHISM: create the proper subclass based on role.
+        User newUser;
+        if ("admin".equalsIgnoreCase(role)) {
+            newUser = new AdminUser(nextId, firstName, lastName, email, password, now, "standard");
+        } else {
+            newUser = new RegularUser(nextId, firstName, lastName, email, password, now, "", "Not set");
+        }
 
-        FileStorageUtil.appendLine(filePath, user.toFileString());
-
-        // Redirect back to the list (POST-Redirect-GET pattern)
+        UserFileManager.saveUser(filePath, newUser);
         response.sendRedirect(request.getContextPath() + "/users");
     }
 
-    // ──────────────────── Helper ─────────────────────────────
-
-    /**
-     * Reads every line from users.txt and converts to User objects.
-     */
-    private List<User> getAllUsers() {
-        List<String> lines = FileStorageUtil.readAllLines(getDataFilePath());
-        List<User> users = new ArrayList<>();
-        for (String line : lines) {
-            User u = new User();
-            u.fromFileString(line);
-            users.add(u);
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String idParam = request.getParameter("id");
+        if (idParam == null || idParam.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/users");
+            return;
         }
-        return users;
+
+        try {
+            int id = Integer.parseInt(idParam.trim());
+            User user = UserFileManager.findUserById(getDataFilePath(), id);
+
+            if (user == null) {
+                response.sendRedirect(request.getContextPath() + "/users");
+                return;
+            }
+
+            request.setAttribute("user", user);
+            request.setAttribute("editMode", true);
+            request.getRequestDispatcher("/WEB-INF/views/user/user-edit.jsp").forward(request, response);
+
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/users");
+        }
+    }
+
+    private void updateUser(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String idParam   = request.getParameter("id");
+        String firstName = request.getParameter("firstName");
+        String lastName  = request.getParameter("lastName");
+        String email     = request.getParameter("email");
+        String password  = request.getParameter("password");
+        String role      = request.getParameter("role");
+
+        if (idParam == null) {
+            response.sendRedirect(request.getContextPath() + "/users");
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idParam.trim());
+            String filePath = getDataFilePath();
+            User existingUser = UserFileManager.findUserById(filePath, id);
+
+            if (existingUser == null) {
+                response.sendRedirect(request.getContextPath() + "/users");
+                return;
+            }
+
+            User updatedUser;
+            if ("admin".equalsIgnoreCase(role)) {
+                updatedUser = new AdminUser(id, firstName, lastName, email, password,
+                                            existingUser.getCreatedDate(), "standard");
+            } else {
+                updatedUser = new RegularUser(id, firstName, lastName, email, password,
+                                              existingUser.getCreatedDate(), "", "Not set");
+            }
+
+            UserFileManager.updateUser(filePath, updatedUser);
+            response.sendRedirect(request.getContextPath() + "/users");
+
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/users");
+        }
+    }
+
+    private void deleteUser(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String idParam = request.getParameter("id");
+        if (idParam == null || idParam.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/users");
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idParam.trim());
+            UserFileManager.deleteUser(getDataFilePath(), id);
+            response.sendRedirect(request.getContextPath() + "/users");
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/users");
+        }
     }
 }

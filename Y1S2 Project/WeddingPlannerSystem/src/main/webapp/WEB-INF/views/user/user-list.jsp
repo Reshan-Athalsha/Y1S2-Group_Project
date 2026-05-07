@@ -73,11 +73,10 @@
                                 </td>
                                 <td><small>${user.createdDate}</small></td>
                                 <td>
-                                    <!-- Placeholder edit/delete links for your team -->
-                                    <a href="#" class="btn btn-sm btn-outline-warning" title="Edit">
+                                    <a href="${pageContext.request.contextPath}/users?action=edit&id=${user.id}" class="btn btn-sm btn-outline-warning" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <a href="#" class="btn btn-sm btn-outline-danger" title="Delete">
+                                    <a href="${pageContext.request.contextPath}/users?action=delete&id=${user.id}" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this user?');">
                                         <i class="bi bi-trash"></i>
                                     </a>
                                 </td>
