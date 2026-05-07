@@ -1,12 +1,12 @@
 package com.weddingplanner.controller;
 
 // ============================================================================
-//  Reviewservlet.java -- HTTP Controller for Component 05
-//  Component 05 -- Reviews and Rating System
+//  VendorServlet.java -- HTTP Controller for Component 02
+//  Component 02 -- Vendor Management
 //  Author: Team -- Wedding Planner System
 // ============================================================================
 
-import com.weddingplanner.model.Review;
+import com.weddingplanner.model.Vendor;
 import com.weddingplanner.util.FileStorageUtil;
 
 import jakarta.servlet.ServletException;
@@ -21,14 +21,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Reviewservlet -- HTTP Controller for Component 05: Reviews and Rating System.
+ * VendorServlet -- HTTP Controller for Component 02: Vendor Management.
  *
- * URL Mapping: /reviews
+ * URL Mapping: /vendors
  */
-@WebServlet("/reviews")
-public class Reviewservlet extends HttpServlet {
+@WebServlet("/vendors")
+public class VendorServlet extends HttpServlet {
 
-    private static final String DATA_FILE = "/WEB-INF/data/reviews.txt";
+    private static final String DATA_FILE = "/WEB-INF/data/vendors.txt";
 
     private static final DateTimeFormatter DATE_FMT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -44,7 +44,7 @@ public class Reviewservlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if ("add".equalsIgnoreCase(action)) {
-            request.getRequestDispatcher("/WEB-INF/views/review/review-form.jsp")
+            request.getRequestDispatcher("/WEB-INF/views/vendor/vendor-form.jsp")
                    .forward(request, response);
 
         } else if ("edit".equalsIgnoreCase(action)) {
@@ -54,16 +54,16 @@ public class Reviewservlet extends HttpServlet {
                     int id = Integer.parseInt(idParam.trim());
                     String line = FileStorageUtil.findById(getDataFilePath(), id);
                     if (line != null) {
-                        Review review = new Review();
-                        review.fromFileString(line);
-                        request.setAttribute("review", review);
-                        request.getRequestDispatcher("/WEB-INF/views/review/review-edit.jsp")
+                        Vendor vendor = new Vendor();
+                        vendor.fromFileString(line);
+                        request.setAttribute("vendor", vendor);
+                        request.getRequestDispatcher("/WEB-INF/views/vendor/vendor-edit.jsp")
                                .forward(request, response);
                         return;
                     }
                 } catch (NumberFormatException ignored) { }
             }
-            response.sendRedirect(request.getContextPath() + "/reviews");
+            response.sendRedirect(request.getContextPath() + "/vendors");
 
         } else if ("delete".equalsIgnoreCase(action)) {
             String idParam = request.getParameter("id");
@@ -73,12 +73,12 @@ public class Reviewservlet extends HttpServlet {
                     FileStorageUtil.deleteById(getDataFilePath(), id);
                 } catch (NumberFormatException ignored) { }
             }
-            response.sendRedirect(request.getContextPath() + "/reviews");
+            response.sendRedirect(request.getContextPath() + "/vendors");
 
         } else {
-            List<Review> reviews = getAllReviews();
-            request.setAttribute("reviews", reviews);
-            request.getRequestDispatcher("/WEB-INF/views/review/review-list.jsp")
+            List<Vendor> vendors = getAllVendors();
+            request.setAttribute("vendors", vendors);
+            request.getRequestDispatcher("/WEB-INF/views/vendor/vendor-list.jsp")
                    .forward(request, response);
         }
     }
@@ -97,53 +97,64 @@ public class Reviewservlet extends HttpServlet {
                     int id = Integer.parseInt(idStr.trim());
                     String line = FileStorageUtil.findById(filePath, id);
                     if (line != null) {
-                        Review review = new Review();
-                        review.fromFileString(line);
+                        Vendor vendor = new Vendor();
+                        vendor.fromFileString(line);
 
                         // Update fields
-                        review.setUserId(parseIntSafe(request.getParameter("userId"), 0));
-                        review.setVendorId(parseIntSafe(request.getParameter("vendorId"), 0));
-                        review.setRating(parseIntSafe(request.getParameter("rating"), 5));
-                        review.setComment(request.getParameter("comment"));
+                        vendor.setBusinessName(request.getParameter("businessName"));
+                        vendor.setCategory(request.getParameter("category"));
+                        vendor.setContactEmail(request.getParameter("contactEmail"));
+                        vendor.setPhone(request.getParameter("phone"));
+                        vendor.setLocation(request.getParameter("location"));
+                        vendor.setDescription(request.getParameter("description"));
+                        
+                        String ratingStr = request.getParameter("rating");
+                        vendor.setRating(parseDoubleSafe(ratingStr, 0.0));
 
-                        FileStorageUtil.updateById(filePath, id, review.toFileString());
+                        FileStorageUtil.updateById(filePath, id, vendor.toFileString());
                     }
                 } catch (NumberFormatException ignored) { }
             }
         } else {
-            // CREATE new review
+            // CREATE new vendor
             int nextId = FileStorageUtil.getNextId(filePath);
             String now = LocalDateTime.now().format(DATE_FMT);
 
-            Review review = new Review(
+            String ratingStr = request.getParameter("rating");
+            double rating = parseDoubleSafe(ratingStr, 0.0);
+
+            Vendor vendor = new Vendor(
                     nextId,
-                    parseIntSafe(request.getParameter("userId"), 0),
-                    parseIntSafe(request.getParameter("vendorId"), 0),
-                    parseIntSafe(request.getParameter("rating"), 5),
-                    request.getParameter("comment"),
+                    request.getParameter("businessName"),
+                    request.getParameter("category"),
+                    request.getParameter("contactEmail"),
+                    request.getParameter("phone"),
+                    request.getParameter("location"),
+                    request.getParameter("description"),
+                    rating,
                     now
             );
 
-            FileStorageUtil.appendLine(filePath, review.toFileString());
+            FileStorageUtil.appendLine(filePath, vendor.toFileString());
         }
 
-        response.sendRedirect(request.getContextPath() + "/reviews");
+        response.sendRedirect(request.getContextPath() + "/vendors");
     }
 
-    private List<Review> getAllReviews() {
+    private List<Vendor> getAllVendors() {
         List<String> lines = FileStorageUtil.readAllLines(getDataFilePath());
-        List<Review> reviews = new ArrayList<>();
+        List<Vendor> vendors = new ArrayList<>();
         for (String line : lines) {
-            Review r = new Review();
-            r.fromFileString(line);
-            reviews.add(r);
+            Vendor v = new Vendor();
+            v.fromFileString(line);
+            vendors.add(v);
         }
-        return reviews;
+        return vendors;
     }
 
-    private int parseIntSafe(String value, int defaultValue) {
+    private double parseDoubleSafe(String value, double defaultValue) {
         if (value == null || value.trim().isEmpty()) return defaultValue;
-        try { return Integer.parseInt(value.trim()); }
+        try { return Double.parseDouble(value.trim()); }
         catch (NumberFormatException e) { return defaultValue; }
     }
 }
