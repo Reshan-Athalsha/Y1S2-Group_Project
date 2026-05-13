@@ -1,0 +1,2 @@
+# Wedding Planner - Vendors Data File
+# Format: vendorId|name|email|phone|businessName|category|price|description|rating|createdAt

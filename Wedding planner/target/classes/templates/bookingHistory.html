@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Booking History</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="/bookings">Wedding Planner - Component 3</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>My Booking History</h2>
+    </div>
+    
+    <!-- Test Form to add a new Booking (Simulating User Action) -->
+    <div class="card mb-4 shadow-sm border-primary">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Simulate New Booking</h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/bookings/new}" method="post" class="row g-3">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="clientId" placeholder="Client ID (e.g. USR-1)" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="vendorId" placeholder="Vendor ID (e.g. VND-1)" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="date" class="form-control" name="date" required>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold">Create Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Booking Collections Table -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Client ID</th>
+                        <th>Vendor ID</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Fallback if Collections ArrayList is empty -->
+                    <tr th:if="${bookings.empty}">
+                        <td colspan="6" class="text-center text-muted py-4">No bookings found. Try creating one above.</td>
+                    </tr>
+                    
+                    <!-- Iterating over the Collections ArrayList -->
+                    <tr th:each="booking : ${bookings}">
+                        <td th:text="${booking.bookingId}" class="fw-bold"></td>
+                        <td th:text="${booking.clientId}"></td>
+                        <td th:text="${booking.vendorId}"></td>
+                        <td th:text="${booking.date}"></td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${booking.status == 'PENDING' ? 'bg-warning text-dark' : (booking.status == 'CONFIRMED' ? 'bg-success' : 'bg-danger')}"
+                                  th:text="${booking.status}"></span>
+                        </td>
+                        <td class="text-center">
+                            <a th:if="${booking.status == 'PENDING'}" th:href="@{/payments/checkout/{id}(id=${booking.bookingId})}" class="btn btn-sm btn-success me-2">Pay Now</a>
+                            <a th:if="${booking.status == 'PENDING'}" th:href="@{/bookings/cancel/{id}(id=${booking.bookingId})}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to cancel this booking?');">Cancel</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

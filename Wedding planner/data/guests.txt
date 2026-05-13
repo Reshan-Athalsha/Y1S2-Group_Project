@@ -1,0 +1,2 @@
+# Wedding Planner - Guest List Data File
+# Format: guestId|planId|name|email|phone|rsvpStatus

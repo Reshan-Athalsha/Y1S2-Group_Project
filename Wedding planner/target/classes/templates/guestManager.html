@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Guest Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="/guests">Wedding Planner - Component 4</a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/itinerary">Itinerary Builder</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Guest List & RSVP Manager</h2>
+    </div>
+
+    <!-- Form to Add Guest -->
+    <div class="card mb-4 shadow-sm border-warning">
+        <div class="card-header bg-warning text-dark fw-bold">
+            Invite Guest to Event
+        </div>
+        <div class="card-body">
+            <form th:action="@{/guests/add}" method="post" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Select Event (Aggregation)</label>
+                    <select name="itineraryId" class="form-select" required>
+                        <option value="" disabled selected>Select Itinerary Event...</option>
+                        <!-- Iterates over itineraries to enforce Aggregation relationship -->
+                        <option th:each="event : ${itineraries}" th:value="${event.itineraryId}" th:text="${event.eventName} + ' (' + ${event.eventDate} + ')'"></option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">Guest Full Name</label>
+                    <input type="text" class="form-control" name="guestName" placeholder="e.g. Jane Doe" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Dietary Requirements</label>
+                    <input type="text" class="form-control" name="dietaryRequirements" placeholder="e.g. Vegan, None" required>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-warning w-100 fw-bold shadow-sm">Add Guest</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Guests Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Guest ID</th>
+                        <th>Event (Itinerary ID)</th>
+                        <th>Guest Name</th>
+                        <th>Dietary Reqs</th>
+                        <th>RSVP Status</th>
+                        <th class="text-center">Manage RSVP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${guests.empty}">
+                        <td colspan="6" class="text-center text-muted py-4">No guests added. Invite someone above!</td>
+                    </tr>
+                    <!-- Loop through Collections ArrayList -->
+                    <tr th:each="guest : ${guests}">
+                        <td th:text="${guest.guestId}" class="fw-bold"></td>
+                        <td><span class="badge bg-info text-dark" th:text="${guest.itineraryId}"></span></td>
+                        <td th:text="${guest.guestName}" class="fw-bold"></td>
+                        <td th:text="${guest.dietaryRequirements}"></td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${guest.rsvpStatus == 'PENDING' ? 'bg-secondary' : (guest.rsvpStatus == 'ATTENDING' ? 'bg-success' : 'bg-danger')}"
+                                  th:text="${guest.rsvpStatus}"></span>
+                        </td>
+                        <td class="text-center">
+                            <!-- Update RSVP via COLLECTIONS operation -->
+                            <form th:action="@{/guests/updateRsvp}" method="post" class="d-inline">
+                                <input type="hidden" name="guestId" th:value="${guest.guestId}">
+                                <select name="rsvpStatus" class="form-select form-select-sm d-inline-block w-auto shadow-sm" onchange="this.form.submit()">
+                                    <option value="" disabled selected>Update...</option>
+                                    <option value="ATTENDING">Attending</option>
+                                    <option value="DECLINED">Declined</option>
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+# Wedding Planner - Users Data File
+# Format: userId|name|email|password|phone|role|createdAt
+# Lines beginning with # are comments and are ignored by FileHandler
+# -------------------------------------------------------------------
+# SEED DATA: Default Admin Account
+ADM-1|System Admin|admin@weddingplanner.lk|admin123|0771234567|ADMIN|2024-01-01 00:00:00
+USR-6A5ED|Reshan|reshan@gmail.com|Reshan@1234|CLIENT

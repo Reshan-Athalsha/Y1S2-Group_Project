@@ -1,0 +1,2 @@
+# Wedding Planner - Reviews Data File
+# Format: reviewId|clientId|vendorId|rating|comment|createdAt

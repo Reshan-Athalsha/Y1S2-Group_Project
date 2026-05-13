@@ -1,0 +1,3 @@
+# Wedding Planner - Payments Data File
+# Format: paymentId|bookingId|amount|method|status|paidAt
+PAY-1|BKG-1|1.0|CREDIT_CARD|COMPLETED

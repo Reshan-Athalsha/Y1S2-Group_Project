@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Register - WeddingBliss</title>
+    <!-- BOOTSTRAP 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border-radius: 15px; border: none; }
+        .card-header { border-radius: 15px 15px 0 0 !important; background-color: #6a11cb; background: linear-gradient(to right, #2575fc, #6a11cb); }
+    </style>
+</head>
+<body class="d-flex align-items-center min-vh-100">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-lg">
+                <div class="card-header text-white text-center py-3">
+                    <h4 class="mb-0">Create an Account</h4>
+                    <small>Join WeddingBliss today!</small>
+                </div>
+                <div class="card-body p-4">
+                    
+                    <!-- Feedback Alerts -->
+                    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                    <div th:if="${param.deleted}" class="alert alert-warning">Your account has been deleted successfully.</div>
+                    
+                    <!-- Registration Form -->
+                    <form action="/register" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Full Name</label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g. John Doe" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Email Address</label>
+                            <input type="email" name="email" class="form-control" placeholder="john@example.com" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Password</label>
+                            <input type="password" name="password" class="form-control" placeholder="Create a strong password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2" style="background: linear-gradient(to right, #2575fc, #6a11cb); border:none;">Register</button>
+                    </form>
+                    
+                    <div class="mt-4 text-center">
+                        <p class="mb-0">Already have an account? <a href="/login" class="text-decoration-none fw-bold" style="color: #6a11cb;">Log in here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

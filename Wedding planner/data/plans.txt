@@ -1,0 +1,3 @@
+# Wedding Planner - Plans / Itinerary Data File
+# Format: planId|clientId|eventName|eventDate|venue|description|status
+ITN-1|001|vibuda|2026-05-13|15:15|new component
