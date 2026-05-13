@@ -1,2 +1,0 @@
-1|Elegant Venues Ltd|Venue|info@elegantvenues.com|0771234567|Colombo|Beautiful wedding halls with garden views|4.5|2026-03-01 10:00:00
-2|Tasty Bites Catering|Catering|hello@tastybites.com|0779876543|Kandy|Premium buffet and plated dinner service|4.2|2026-03-01 10:10:00

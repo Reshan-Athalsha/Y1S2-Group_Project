@@ -1,7 +1,0 @@
-com\weddingplanner\model\BaseEntity.class
-com\weddingplanner\model\Vendor.class
-com\weddingplanner\model\User.class
-com\weddingplanner\util\FileStorageUtil.class
-com\weddingplanner\controller\UserServlet.class
-com\weddingplanner\model\Booking.class
-com\weddingplanner\model\Review.class
