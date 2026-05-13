@@ -52,9 +52,8 @@ This application is designed to run locally on any machine with Java installed.
 
 1. **Clone the Repository:**
    Download the `.zip` or clone the repository to your local machine.
-   ```bash
-https://github.com/Reshan-Athalsha/Y1S2-Group_Project
-//
+   https://github.com/Reshan-Athalsha/Y1S2-Group_Project ```bash
+
    Open in IDE:
 Open the project folder in IntelliJ IDEA (or Eclipse/VS Code). Allow Maven a few moments to resolve and download the Spring Boot dependencies from the pom.xml.
 
